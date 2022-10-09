@@ -3,7 +3,7 @@ project(TrashEngine)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(TrashEngine src/main.cpp src/Window.hpp src/App.hpp)
+add_executable(TrashEngine src/main.cpp src/Window.hpp src/App.hpp src/Time.hpp)
 
 set(TARGET_LIB
         "/usr/lib/x86_64-linux-gnu/libGL.so"

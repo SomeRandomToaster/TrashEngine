@@ -7,7 +7,7 @@
 
 #endif //TRASHENGINE_WINDOW_HPP
 
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <string>
 
 using namespace std;
@@ -22,11 +22,11 @@ class Window {
     static void displayCallback();
 public:
     Window(const int width, const int height, const string& title);
-    ~Window();
     int getWidth();
     int getHeight();
     string getTitle();
     void render();
+    void destroy();
 };
 
 Window::Window(const int width, const int height, const string& title) {
@@ -40,6 +40,7 @@ Window::Window(const int width, const int height, const string& title) {
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow(title.c_str());
     glClearColor(0,0,0, 0);
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
     setupStaticWindowFunctions();
 }
 int Window::getWidth() {
@@ -57,15 +58,16 @@ void Window::render() {
 
     glutSwapBuffers();
 }
-Window::~Window() {
-    glutDestroyWindow(glutGetWindow());
-}
+
 void Window::displayCallback() {
     currentWindowInstance->render();
 }
 
-void Window::setupStaticWindowFunctions()
-{
+void Window::setupStaticWindowFunctions() {
     currentWindowInstance = this;
     ::glutDisplayFunc(Window::displayCallback);
+}
+
+void Window::destroy() {
+    glutDestroyWindow(glutGetWindow());
 }

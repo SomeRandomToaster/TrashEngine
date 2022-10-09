@@ -11,7 +11,15 @@ class App;
 App* currentAppInstance;
 
 class App {
+    const int MAX_FPS=240;
     Window window;
+    Time time;
+    bool isRunning;
+    unsigned long long lastTime;
+    double unprocessedTime;
+    double frameTimeCounter;
+    double frameTime;
+    int frameCounter;
     static void loopCallback();
     void setupStaticAppFunctions();
 public:
@@ -25,19 +33,54 @@ public:
 
 App::App(Window& window) : window(window) {
     setupStaticAppFunctions();
+    isRunning=false;
+    lastTime=time.getTime();
+    unprocessedTime=0;
+    frameTimeCounter=0;
+    frameCounter=0;
+    frameTime=1/(double)MAX_FPS;
 }
 
 void App::start() {
-    run();
+    if(isRunning)
+        return;
+    isRunning=true;
     glutMainLoop();
+
+    stop();
 }
 
 void App::stop() {
-
+    isRunning=false;
+    cleanUp();
 }
 
 void App::run() {
-    render();
+    bool render= false;
+    unsigned long long startTime = time.getTime();
+    unsigned long long passedTime=startTime-lastTime;
+    lastTime=startTime;
+
+    unprocessedTime+=passedTime/time.SECOND;
+    frameTimeCounter+=passedTime;
+
+    while(unprocessedTime>frameTime) {
+        render=true;
+        unprocessedTime-=frameTime;
+        time.setDelta(frameTime);
+
+        //UPDATE
+
+        if(frameTimeCounter>=time.SECOND) {
+            std::cout << frameCounter << std::endl;
+            frameCounter=0;
+            frameTimeCounter=0;
+        }
+    }
+    if(render) {
+        this->render();
+        frameCounter++;
+    }
 }
 
 void App::render() {
