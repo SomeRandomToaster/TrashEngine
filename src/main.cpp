@@ -2,6 +2,8 @@
 #include <chrono>
 #include "Time.hpp"
 #include "Window.hpp"
+#include "Vectors.hpp"
+#include "Input.hpp"
 #include "App.hpp"
 
 const int WIDTH=800;

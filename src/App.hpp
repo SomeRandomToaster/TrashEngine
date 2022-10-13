@@ -14,6 +14,7 @@ class App {
     const int MAX_FPS=240;
     Window window;
     Time time;
+    Input input;
     bool isRunning;
     unsigned long long lastTime;
     double unprocessedTime;
@@ -29,6 +30,8 @@ public:
     void run();
     void render();
     void cleanUp();
+    void update();
+    void processInput();
 };
 
 App::App(Window& window) : window(window) {
@@ -70,6 +73,8 @@ void App::run() {
         time.setDelta(frameTime);
 
         //UPDATE
+        processInput();
+        update();
 
         if(frameTimeCounter>=time.SECOND) {
             std::cout << frameCounter << std::endl;
@@ -98,4 +103,10 @@ void App::setupStaticAppFunctions()
 {
     currentAppInstance = this;
     ::glutIdleFunc(App::loopCallback);
+}
+void App::update() {
+
+}
+void App::processInput() {
+
 }
