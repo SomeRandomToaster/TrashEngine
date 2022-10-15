@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <cmath>
 #include "Time.hpp"
 #include "Window.hpp"
 #include "Vectors.hpp"
