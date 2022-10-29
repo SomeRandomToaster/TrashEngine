@@ -7,21 +7,18 @@
 
 #endif //TRASHENGINE_WINDOW_HPP
 
-#include <GL/freeglut.h>
-#include <string>
-
 using namespace std;
 
-class Window;
-static Window* currentWindowInstance;
+class WindowClass;
+static WindowClass* currentWindowInstance;
 
-class Window {
+class WindowClass {
     int width, height;
     string title;
     void setupStaticWindowFunctions();
     static void displayCallback();
 public:
-    Window(const int width, const int height, const string& title);
+    WindowClass(const int width, const int height, const string& title);
     int getWidth();
     int getHeight();
     string getTitle();
@@ -29,7 +26,7 @@ public:
     void destroy();
 };
 
-Window::Window(const int width, const int height, const string& title) {
+WindowClass::WindowClass(const int width, const int height, const string& title) {
     this->width=width;
     this->height=height;
     this->title=title;
@@ -37,37 +34,39 @@ Window::Window(const int width, const int height, const string& title) {
     char** argv=nullptr;
     glutInit(&argc, argv);
     glutInitWindowSize(width, height);
+    glutInitContextVersion(4, 3);
+    glutInitContextProfile(GLUT_CORE_PROFILE);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow(title.c_str());
     glClearColor(0,0,0, 0);
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+    glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
+    glewInit();
     setupStaticWindowFunctions();
 }
-int Window::getWidth() {
+int WindowClass::getWidth() {
     return width;
 }
-int Window::getHeight() {
+int WindowClass::getHeight() {
     return height;
 }
-string Window::getTitle() {
+string WindowClass::getTitle() {
     return title;
 }
-void Window::render() {
-    glClearColor(0,1,0,0);
-    glClear(GL_COLOR_BUFFER_BIT);
+void WindowClass::render() {
 
     glutSwapBuffers();
 }
 
-void Window::displayCallback() {
+void WindowClass::displayCallback() {
     currentWindowInstance->render();
 }
 
-void Window::setupStaticWindowFunctions() {
+void WindowClass::setupStaticWindowFunctions() {
     currentWindowInstance = this;
-    ::glutDisplayFunc(Window::displayCallback);
+    ::glutDisplayFunc(WindowClass::displayCallback);
 }
 
-void Window::destroy() {
+void WindowClass::destroy() {
     glutDestroyWindow(glutGetWindow());
 }

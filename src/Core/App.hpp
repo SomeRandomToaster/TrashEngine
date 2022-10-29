@@ -12,9 +12,11 @@ App* currentAppInstance;
 
 class App {
     const int MAX_FPS=240;
-    Window window;
-    Time time;
+    WindowClass window;
+    TimeClass time;
     Input input;
+    RenderTool renderTool;
+    Mesh mesh; //REMOVE ME LATER
     bool isRunning;
     unsigned long long lastTime;
     double unprocessedTime;
@@ -24,7 +26,7 @@ class App {
     static void loopCallback();
     void setupStaticAppFunctions();
 public:
-    App(Window& window);
+    App(WindowClass& window);
     void start();
     void stop();
     void run();
@@ -34,7 +36,7 @@ public:
     void processInput();
 };
 
-App::App(Window& window) : window(window) {
+App::App(WindowClass& window) : window(window) {
     setupStaticAppFunctions();
     isRunning=false;
     lastTime=time.getTime();
@@ -48,6 +50,17 @@ void App::start() {
     if(isRunning)
         return;
     isRunning=true;
+
+    //REMOVE ME LATER
+    vector<Vertex> data {
+        Vertex(vector3f(-1,-1,0)),
+        Vertex(vector3f(0,1,0)),
+        Vertex(vector3f(1,-1,0)),
+    };
+    mesh.init();
+    mesh.addVertices(data);
+    //REMOVE ME LATER ^
+
     glutMainLoop();
 
     stop();
@@ -89,6 +102,8 @@ void App::run() {
 }
 
 void App::render() {
+    renderTool.clearScreen();
+    mesh.draw();
     window.render();
 }
 

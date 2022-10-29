@@ -3,12 +3,13 @@ project(TrashEngine)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(TrashEngine src/main.cpp src/Window.hpp src/App.hpp src/Time.hpp src/Input.hpp src/Vectors.hpp)
+add_executable(TrashEngine src/Core/main.cpp src/Core/Window.hpp src/Core/App.hpp src/Utils/Time.hpp src/Utils/Input.hpp src/Math/Vectors.hpp src/Utils/RenderUtils.hpp src/Graphics/Vertex.hpp src/Graphics/Mesh.hpp)
 
 set(TARGET_LIB
         "/usr/lib/x86_64-linux-gnu/libGL.so"
         "/usr/lib/x86_64-linux-gnu/libGLU.so"
         "/usr/lib/x86_64-linux-gnu/libglut.so"
+        "/usr/lib/x86_64-linux-gnu/libGLEW.so"
         )
 
 target_link_libraries(TrashEngine ${TARGET_LIB})

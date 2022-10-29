@@ -141,6 +141,7 @@ vector3f vector3f::operator/ (const double a) const {
 }
 ostream& operator<< (ostream &out, const vector3f& v) {
     out << "X: " << v.x << " Y: " << v.y << " Z: " << v.z;
+    return out;
 }
 vector3f operator* (const double a, const vector3f& v) {
     return vector3f(v.x*a, v.y*a, v.z*a);

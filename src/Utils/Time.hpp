@@ -7,7 +7,7 @@
 
 #endif //TRASHENGINE_TIME_HPP
 
-class Time {
+class TimeClass {
     double delta;
 public:
     const double SECOND = 1e9;
@@ -16,13 +16,13 @@ public:
     unsigned long long getTime();
 };
 
-void Time::setDelta(const double delta) {
+void TimeClass::setDelta(const double delta) {
     this->delta=delta;
 }
-double Time::getDelta() {
+double TimeClass::getDelta() {
     return delta;
 }
-unsigned long long Time::getTime() {
+unsigned long long TimeClass::getTime() {
     using namespace std::chrono;
     return duration_cast<nanoseconds>(high_resolution_clock::now().time_since_epoch()).count();
 }
