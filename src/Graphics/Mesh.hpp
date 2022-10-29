@@ -8,8 +8,8 @@
 #endif //TRASHENGINE_MESH_HPP
 
 class Mesh {
-    const string VERTEX_SHADER_PATH="../src/Graphics/Shaders/VertexShader.glsl";
-    const string FRAGMENT_SHADER_PATH="../src/Graphics/Shaders/FragmentShader.glsl";
+    //const string VERTEX_SHADER_PATH="../src/Graphics/Shaders/VertexShader.glsl";
+    //const string FRAGMENT_SHADER_PATH="../src/Graphics/Shaders/FragmentShader.glsl";
     GLuint vboId;
     GLuint vShaderId;
     GLuint fShaderId;
@@ -18,19 +18,12 @@ class Mesh {
     GLuint linkProgram(GLuint vShader, GLuint fShader);
     int vCount;
 public:
-    Mesh();
+    void setProgramID(const GLuint program);
     void addVertices(const vector <Vertex> &v );
     void draw();
-    void init();
 };
-void Mesh::init() {
-
-}
-Mesh::Mesh() {
-
-
-}
 void Mesh::addVertices(const vector <Vertex> &v ) {
+
     vCount=v.size();
     GLfloat* vertices=new GLfloat[v.size()*3];
     for(int i=0; i<v.size(); i++) {
@@ -43,10 +36,8 @@ void Mesh::addVertices(const vector <Vertex> &v ) {
     glBufferData(GL_ARRAY_BUFFER, vCount*3*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    vShaderId=compileShader(VERTEX_SHADER_PATH, GL_VERTEX_SHADER);
-    fShaderId=compileShader(FRAGMENT_SHADER_PATH, GL_FRAGMENT_SHADER);
-    programId=linkProgram(vShaderId, fShaderId);
-    GLuint posAttributePosition = glGetAttribLocation(programId, "pos");
+
+    GLuint posAttributePosition = glGetAttribLocation(programId, "position");
 
     GLuint vaoId;
     glGenVertexArrays(1, &vaoId);
@@ -55,7 +46,7 @@ void Mesh::addVertices(const vector <Vertex> &v ) {
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
     glVertexAttribPointer(posAttributePosition, vCount, GL_FLOAT, false, 0, nullptr);
     glEnableVertexAttribArray(posAttributePosition);
-    glUseProgram(programId);
+
 }
 void Mesh::draw() {
     glDrawArrays(GL_TRIANGLES, 0, vCount);
@@ -118,9 +109,12 @@ GLuint Mesh::linkProgram(GLuint vShader, GLuint fShader) {
 
         return 0;
     }
-    else {
+    /*else {
         cout << "link successful" << endl;
-    }
+    }*/
 
     return programID;
+}
+void Mesh::setProgramID(const GLuint program) {
+    programId=program;
 }

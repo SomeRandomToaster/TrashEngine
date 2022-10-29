@@ -12,10 +12,13 @@ App* currentAppInstance;
 
 class App {
     const int MAX_FPS=240;
+    const string VERTEX_SHADER_PATH="../src/Graphics/Shaders/VertexShader.glsl";
+    const string FRAGMENT_SHADER_PATH="../src/Graphics/Shaders/FragmentShader.glsl";
     WindowClass window;
     TimeClass time;
     Input input;
     RenderTool renderTool;
+    ResourceLoader loader;
     Mesh mesh; //REMOVE ME LATER
     bool isRunning;
     unsigned long long lastTime;
@@ -50,14 +53,16 @@ void App::start() {
     if(isRunning)
         return;
     isRunning=true;
-
+    loader.loadVertexShader(VERTEX_SHADER_PATH);
+    loader.loadFragmentShader(FRAGMENT_SHADER_PATH);
+    loader.compileShaderProgram();
+    mesh.setProgramID(loader.getProgramID());
     //REMOVE ME LATER
     vector<Vertex> data {
         Vertex(vector3f(-1,-1,0)),
         Vertex(vector3f(0,1,0)),
         Vertex(vector3f(1,-1,0)),
     };
-    mesh.init();
     mesh.addVertices(data);
     //REMOVE ME LATER ^
 

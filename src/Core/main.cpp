@@ -14,6 +14,7 @@
 #include <string>
 #include "../Utils/RenderUtils.hpp"
 #include "../Utils/Time.hpp"
+#include "../Utils/ResourceLoader.hpp"
 #include "Window.hpp"
 #include "../Math/Vectors.hpp"
 #include "../Utils/Input.hpp"
