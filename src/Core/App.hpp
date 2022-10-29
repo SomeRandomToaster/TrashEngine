@@ -18,7 +18,7 @@ class App {
     TimeClass time;
     Input input;
     RenderTool renderTool;
-    ResourceLoader loader;
+    Shaders shaderManager;
     Mesh mesh; //REMOVE ME LATER
     bool isRunning;
     unsigned long long lastTime;
@@ -53,10 +53,10 @@ void App::start() {
     if(isRunning)
         return;
     isRunning=true;
-    loader.loadVertexShader(VERTEX_SHADER_PATH);
-    loader.loadFragmentShader(FRAGMENT_SHADER_PATH);
-    loader.compileShaderProgram();
-    mesh.setProgramID(loader.getProgramID());
+    shaderManager.loadVertexShader(VERTEX_SHADER_PATH);
+    shaderManager.loadFragmentShader(FRAGMENT_SHADER_PATH);
+    shaderManager.compileShaderProgram();
+    mesh.setProgramID(shaderManager.getProgramID());
     //REMOVE ME LATER
     vector<Vertex> data {
         Vertex(vector3f(-1,-1,0)),
@@ -65,7 +65,6 @@ void App::start() {
     };
     mesh.addVertices(data);
     //REMOVE ME LATER ^
-
     glutMainLoop();
 
     stop();

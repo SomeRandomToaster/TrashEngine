@@ -7,30 +7,36 @@
 
 #endif //TRASHENGINE_RESOURCELOADER_HPP
 
-class ResourceLoader {
+class Shaders {
     GLuint vShaderId;
     GLuint fShaderId;
     GLuint programId;
     GLuint compileShader(const std::string& filePath, const GLenum shaderType);
     GLuint linkProgram(GLuint vShader, GLuint fShader);
+    map<string, GLint> uniformIdMap;
 public:
     void loadVertexShader(const std::string& filePath);
     void loadFragmentShader(const std::string& filePath);
     void compileShaderProgram();
     GLuint getProgramID();
+    void addUniform(const string& name);
+    void setUniform(const string& name, const int val);
+    void setUniform(const string& name, const float val);
+    void setUniform(const string& name, const vector3f& val);
+    void setUniform(const string& name, const matrix4f& val);
 };
 
-void ResourceLoader::loadVertexShader(const std::string& filePath) {
+void Shaders::loadVertexShader(const std::string& filePath) {
     vShaderId=compileShader(filePath, GL_VERTEX_SHADER);
 }
-void ResourceLoader::loadFragmentShader(const std::string& filePath) {
+void Shaders::loadFragmentShader(const std::string& filePath) {
     fShaderId=compileShader(filePath, GL_FRAGMENT_SHADER);
 }
-void ResourceLoader::compileShaderProgram() {
+void Shaders::compileShaderProgram() {
     programId=linkProgram(vShaderId, fShaderId);
     glUseProgram(programId);
 }
-GLuint ResourceLoader::compileShader(const std::string& filePath, const GLenum shaderType) {
+GLuint Shaders::compileShader(const std::string& filePath, const GLenum shaderType) {
     GLuint shaderID = glCreateShader(shaderType);
     std::string shaderCode;
     std::ifstream shaderFile(filePath);
@@ -65,7 +71,7 @@ GLuint ResourceLoader::compileShader(const std::string& filePath, const GLenum s
     }
     return shaderID;
 }
-GLuint ResourceLoader::linkProgram(GLuint vShader, GLuint fShader) {
+GLuint Shaders::linkProgram(GLuint vShader, GLuint fShader) {
     GLuint programID=glCreateProgram();
     if (programID == 0)
     {
@@ -93,6 +99,22 @@ GLuint ResourceLoader::linkProgram(GLuint vShader, GLuint fShader) {
 
     return programID;
 }
-GLuint ResourceLoader::getProgramID() {
+GLuint Shaders::getProgramID() {
     return programId;
+}
+void Shaders::addUniform(const std::string& name) {
+    GLint uniformId=glGetUniformLocation(programId, name.c_str());
+    uniformIdMap.insert({name, uniformId});
+}
+void Shaders::setUniform(const string& name, const int val) {
+    glUniform1i(uniformIdMap[name], val);
+}
+void Shaders::setUniform(const string& name, const float val) {
+    glUniform1f(uniformIdMap[name], val);
+}
+void Shaders::setUniform(const string& name, const vector3f& val) {
+    glUniform3f(uniformIdMap[name], val.getX(), val.getY(), val.getZ());
+}
+void Shaders::setUniform(const string& name, const matrix4f& val) {
+    glUniformMatrix4fv(uniformIdMap[name], 1, GL_FALSE, val.data);
 }

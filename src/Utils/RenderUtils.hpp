@@ -9,6 +9,8 @@
 
 #endif //TRASHENGINE_RENDERUTILS_HPP
 
+using namespace  std;
+
 class RenderTool {
     const static int defaultVertexBufSize=10000;
 

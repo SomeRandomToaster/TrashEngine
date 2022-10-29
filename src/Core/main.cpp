@@ -11,12 +11,15 @@
 #include <chrono>
 #include <cmath>
 #include <vector>
+#include <map>
 #include <string>
+#include <exception>
 #include "../Utils/RenderUtils.hpp"
 #include "../Utils/Time.hpp"
-#include "../Utils/ResourceLoader.hpp"
-#include "Window.hpp"
 #include "../Math/Vectors.hpp"
+#include "../Math/Matrices.hpp"
+#include "../Utils/Shaders.hpp"
+#include "Window.hpp"
 #include "../Utils/Input.hpp"
 #include "../Graphics/Vertex.hpp"
 #include "../Graphics/Mesh.hpp"
@@ -32,5 +35,6 @@ int main() {
     WindowClass window(WIDTH, HEIGHT, TITLE);
     App testApp(window);
     testApp.start();
+
     return 0;
 }
