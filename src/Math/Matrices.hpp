@@ -19,11 +19,13 @@ public:
     matrix4f();
     matrix4f(const vector<float>& v);
     matrix4f(const vector<vector<float>>& v);
+    matrix4f(const matrix4f& A);
     ~matrix4f();
     void initIdentity();
     vector <vector<float>> getData();
     void setData(vector<float>& v);
     void setData(vector<vector<float>>& v);
+    matrix4f& operator=(const matrix4f& A);
     friend matrix4f operator* (const matrix4f& A, const matrix4f& B);
 };
 
@@ -116,4 +118,16 @@ matrix4f operator* (const matrix4f& A, const matrix4f& B) {
         }
     }
     return ans;
+}
+matrix4f::matrix4f(const matrix4f &A) {
+    data=new float[16];
+    for(int i=0; i<16; i++) {
+        data[i]=A.data[i];
+    }
+}
+matrix4f& matrix4f::operator=(const matrix4f& A) {
+    for(int i=0; i<16; i++) {
+        data[i]=A.data[i];
+    }
+    return *this;
 }
