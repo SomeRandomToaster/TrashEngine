@@ -64,13 +64,21 @@ void App::start() {
         Vertex(vector3f(-1,-1,0)),
         Vertex(vector3f(0,1,0)),
         Vertex(vector3f(1,-1,0)),
+        Vertex(vector3f(0,-1,1)),
     };*/
     vector<Vertex> data {
-        Vertex(vector3f(-0.5,-sqrt(3)/6,0)),
-        Vertex(vector3f(0,sqrt(3)/3,0)),
-        Vertex(vector3f(0.5,-sqrt(3)/6,0)),
+        Vertex(vector3f(-0.5,-1/sqrt(6),-sqrt(3)/6)),
+        Vertex(vector3f(0.5, -1/sqrt(6), -sqrt(3)/6)),
+        Vertex(vector3f(0, -1/sqrt(6), sqrt(3)/3)),
+        Vertex(vector3f(0, sqrt(3)/2-1/sqrt(6), 0)),
     };
-    mesh.addVertices(data);
+    vector<GLuint> indices {
+        1, 3, 0,
+        0, 3, 2,
+        2, 3, 1,
+        0, 2, 1
+    };
+    mesh.addVertices(data, indices);
     //REMOVE ME LATER ^
     shaderManager.addUniform("transformMatrix");
     //transform.setTranslation(0.5, 0.25, 0);
@@ -138,10 +146,10 @@ void App::setupStaticAppFunctions()
 }
 void App::update() {
     long double timeSec=(time.getTime()-appStartTime)/(long double)1e9;
-    transform.setTranslation(sin(timeSec*acos(-1)),0, 0);
-    transform.setRotation(0, 0, 2*acos(-1)*timeSec);
+    //transform.setTranslation(sin(timeSec*acos(-1)),0, 0);
+    transform.setRotation(0, timeSec*acos(-1), 0);
     float scale=0.625+0.375*sin(2*timeSec*acos(-1));
-    transform.setScale(scale, scale, scale);
+    //transform.setScale(scale, scale, scale);
     shaderManager.setUniform("transformMatrix", transform.getMatrix());
 }
 void App::processInput() {
