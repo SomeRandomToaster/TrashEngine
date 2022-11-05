@@ -23,6 +23,7 @@ public:
     Mesh();
     void setProgramID(const GLuint program);
     void addVertices(const vector <Vertex> &v, const vector<GLuint> &i);
+    void addVerticesFromModel(const string& fileName);
     void draw();
 };
 Mesh::Mesh() {
@@ -135,4 +136,34 @@ GLuint Mesh::linkProgram(GLuint vShader, GLuint fShader) {
 } */
 void Mesh::setProgramID(const GLuint program) {
     programId=program;
+}
+void Mesh::addVerticesFromModel(const string& fileName) {
+    ifstream model;
+    model.open(fileName);
+    vector <string> strArray;
+    while(!model.eof()) {
+        string str;
+        model >> str;
+        strArray.push_back(str);
+    }
+    vector<Vertex> vBuf;
+    vector<GLuint> iBuf;
+    for(int i=0; i<strArray.size(); i++) {
+        if(strArray[i].size()==1 && strArray[i][0]=='v') {
+            float x = stof(strArray[i+1]);
+            float y = stof(strArray[i+2]);
+            float z = stof(strArray[i+3]);
+            Vertex newVertex(vector3f(x, y, z));
+            vBuf.push_back(newVertex);
+        }
+        if(strArray[i].size()==1 && strArray[i][0]=='f') {
+            float p1 = stoi(strArray[i+1])-1;
+            float p2 = stoi(strArray[i+2])-1;
+            float p3 = stoi(strArray[i+3])-1;
+            iBuf.push_back(p1);
+            iBuf.push_back(p2);
+            iBuf.push_back(p3);
+        }
+    }
+    addVertices(vBuf, iBuf);
 }

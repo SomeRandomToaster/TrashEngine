@@ -14,6 +14,7 @@ class App {
     const int MAX_FPS=240;
     const string VERTEX_SHADER_PATH="../src/Graphics/Shaders/VertexShader.glsl";
     const string FRAGMENT_SHADER_PATH="../src/Graphics/Shaders/FragmentShader.glsl";
+    const string MODEL_PATH="../res/models/iWantPizza.obj";
     WindowClass window;
     TimeClass time;
     Input input;
@@ -78,7 +79,8 @@ void App::start() {
         2, 3, 1,
         0, 2, 1
     };
-    mesh.addVertices(data, indices);
+    mesh.addVerticesFromModel(MODEL_PATH);
+    //mesh.addVertices(data, indices);
     //REMOVE ME LATER ^
     shaderManager.addUniform("transformMatrix");
     //transform.setTranslation(0.5, 0.25, 0);
@@ -127,7 +129,7 @@ void App::run() {
 }
 
 void App::render() {
-    renderTool.clearScreen();
+    renderTool.clearScreen(0.25, 0.25, 0.25);
     mesh.draw();
     window.render();
 }
@@ -147,11 +149,39 @@ void App::setupStaticAppFunctions()
 void App::update() {
     long double timeSec=(time.getTime()-appStartTime)/(long double)1e9;
     //transform.setTranslation(sin(timeSec*acos(-1)),0, 0);
-    transform.setRotation(0, timeSec*acos(-1), 0);
+    //transform.setRotation(timeSec*acos(-1), timeSec*acos(-1), 0);
     float scale=0.625+0.375*sin(2*timeSec*acos(-1));
     //transform.setScale(scale, scale, scale);
     shaderManager.setUniform("transformMatrix", transform.getMatrix());
 }
 void App::processInput() {
-
+    float scaleSpeed=0.005f;
+    float rotateSpeed=1.0f;
+    static float scale=1.0f;
+    static float rotationX=0.0f;
+    static float rotationY=0.0f;
+    if(input.getKeyState('z')) {
+        scale-=scaleSpeed;
+        transform.setScale(scale, scale, scale);
+    }
+    if(input.getKeyState('x')) {
+        scale+=scaleSpeed;
+        transform.setScale(scale, scale, scale);
+    }
+    if(input.getKeyState('a')) {
+        rotationY+=rotateSpeed*acos(-1)/180;
+        transform.setRotation(rotationX, rotationY, 0);
+    }
+    if(input.getKeyState('d')) {
+        rotationY-=rotateSpeed*acos(-1)/180;
+        transform.setRotation(rotationX, rotationY, 0);
+    }
+    if(input.getKeyState('w')) {
+        rotationX+=rotateSpeed*acos(-1)/180;
+        transform.setRotation(rotationX, rotationY, 0);
+    }
+    if(input.getKeyState('s')) {
+        rotationX-=rotateSpeed*acos(-1)/180;
+        transform.setRotation(rotationX, rotationY, 0);
+    }
 }
