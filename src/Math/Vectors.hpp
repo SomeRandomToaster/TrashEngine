@@ -2,6 +2,7 @@
 // Created by leo on 13/10/22.
 //
 
+
 #ifndef TRASHENGINE_VECTORS_HPP
 #define TRASHENGINE_VECTORS_HPP
 
@@ -45,6 +46,7 @@ public:
     friend ostream& operator<< (ostream &out, const vector3f& v);
     friend vector3f operator* (const double a, const vector3f& v);
     friend vector3f operator* (const vector3f& v, const double a);
+    friend vector3f operator* (const vector3f& v, const matrix3f& A);
     friend double dot(const vector3f& v, const vector3f& w);
     friend vector3f cross(const vector3f& v, const vector3f& w);
 };
@@ -156,5 +158,12 @@ vector3f cross(const vector3f& v, const vector3f& w) {
     double ans_x=v.y*w.z-v.z*w.y;
     double ans_y=v.x*w.z-v.z*w.x;
     double ans_z=v.x*w.y-v.y*w.x;
-    return vector3f(ans_x, ans_y, ans_z);
+    return vector3f(-ans_x, ans_y, -ans_z);
+}
+vector3f operator* (const vector3f& v, const matrix3f& A) {
+    vector <vector<float>> vec=A.getData();
+    float x=v.getX()*vec[0][0]+v.getY()*vec[0][1]+v.getZ()*vec[0][2];
+    float y=v.getX()*vec[1][0]+v.getY()*vec[1][1]+v.getZ()*vec[1][2];
+    float z=v.getX()*vec[2][0]+v.getY()*vec[2][1]+v.getZ()*vec[2][2];
+    return vector3f(x, y, z);
 }

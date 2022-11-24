@@ -16,8 +16,10 @@
 #include <exception>
 #include "../Utils/RenderUtils.hpp"
 #include "../Utils/Time.hpp"
-#include "../Math/Vectors.hpp"
 #include "../Math/Matrices.hpp"
+#include "../Math/Vectors.hpp"
+#include "../Math/VectorTransformation.hpp"
+#include "../Math/Camera.hpp"
 #include "../Math/MatrixTransformation.hpp"
 #include "../Utils/Shaders.hpp"
 #include "Window.hpp"

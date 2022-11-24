@@ -11,16 +11,21 @@ class MatrixTransformer {
     vector3f translate;
     vector3f rotate;
     vector3f scale;
+    matrix4f projectionMatrix;
+    Camera camera;
     void updateMatrix();
 public:
+    void initProjection(const float fovAngle, const float screenWidth, const float screenHeight, const float zNear, const float zFar);
     void setTranslation(const float x, const float y, const float z);
     void setRotation(const float x, const float y, const float z);
     void setScale(const float x, const float y, const float z);
+    void setCamera(const Camera& cam);
     void addTranslation(const float x, const float y, const float z);
     matrix4f transformMatrix;
     MatrixTransformer();
     float* getMatrixData();
-    matrix4f getMatrix();
+    matrix4f getTransformation();
+    matrix4f getProjectedTransformation();
 };
 
 MatrixTransformer::MatrixTransformer() :
@@ -28,10 +33,8 @@ MatrixTransformer::MatrixTransformer() :
     rotate(0, 0, 0),
     scale(1, 1, 1)
     {
+        projectionMatrix.initIdentity();
         transformMatrix.initIdentity();
-        /*for(int i=0; i<16; i++) {
-            cout << transformMatrix.data[i] << " ";
-        }*/
     }
 void MatrixTransformer::updateMatrix() {
     transformMatrix.initIdentity();
@@ -67,6 +70,8 @@ void MatrixTransformer::updateMatrix() {
     scaleMatrix.data[10]=scale.getZ();
 
     transformMatrix=transformMatrix*rotateYZ*rotateXZ*rotateXY*scaleMatrix;
+    //transformMatrix=scaleMatrix*rotateXY*rotateXZ*rotateYZ*transformMatrix;
+    //transformMatrix=projectionMatrix*transformMatrix;
 }
 void MatrixTransformer::setTranslation(const float x, const float y, const float z) {
     translate=vector3f(x, y, z);
@@ -92,6 +97,49 @@ void MatrixTransformer::addTranslation(const float x, const float y, const float
 float* MatrixTransformer::getMatrixData() {
     return transformMatrix.data;
 }
-matrix4f MatrixTransformer::getMatrix() {
+matrix4f MatrixTransformer::getTransformation() {
     return  transformMatrix;
+}
+void MatrixTransformer::initProjection(const float fovAngle, const float screenWidth, const float screenHeight, const float zNear, const float zFar) {
+    float screenRatio=screenWidth/screenHeight;
+    float width=zNear*tan(fovAngle/2.0f)*screenRatio;
+    float height=zNear*tan(fovAngle/2.0f);
+    for(int i=0; i<16; i++) {
+        projectionMatrix.data[i]=0;
+    }
+    projectionMatrix.data[0]=(2*zNear/width);
+    projectionMatrix.data[5]=(2*zNear/height);
+    projectionMatrix.data[10]=(zNear+zFar)/(zNear-zFar);
+    projectionMatrix.data[11]=(2*zNear*zFar)/(zNear-zFar);
+    projectionMatrix.data[14]=-1;
+}
+matrix4f MatrixTransformer::getProjectedTransformation() {
+    //camera translation
+    matrix4f cameraTranslation;
+    cameraTranslation.initIdentity();
+    cameraTranslation.data[3]=-camera.getPos().getX();
+    cameraTranslation.data[7]=-camera.getPos().getY();
+    cameraTranslation.data[11]=-camera.getPos().getZ();
+    //camera rotation
+    matrix4f cameraRotation;
+    cameraRotation.initIdentity();
+    vector3f r=camera.getRight().normalize();
+    vector3f u=camera.getUp().normalize();
+    vector3f f=camera.getForward().normalize();
+    cameraRotation.data[0]=r.getX();
+    cameraRotation.data[1]=r.getY();
+    cameraRotation.data[2]=r.getZ();
+    cameraRotation.data[4]=u.getX();
+    cameraRotation.data[5]=u.getY();
+    cameraRotation.data[6]=u.getZ();
+    cameraRotation.data[8]=-f.getX();
+    cameraRotation.data[9]=-f.getY();
+    cameraRotation.data[10]=-f.getZ();
+    //cout << camera.getForward().length() << endl
+    //cout << dot(f, r) << " " << dot(u, r) << " " << dot(u, f) << endl;
+    matrix4f cameraMatrix=cameraRotation*cameraTranslation;
+    return projectionMatrix*cameraMatrix*transformMatrix;
+}
+void MatrixTransformer::setCamera(const Camera& cam) {
+    camera=cam;
 }
