@@ -67,7 +67,7 @@ void App::start() {
     glutWarpPointer(window.getWidth()/2, window.getHeight()/2);
     glutSetCursor(GLUT_CURSOR_NONE);
     mesh.addVerticesFromModel(MODEL_PATH);
-    transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 1000.0f);
+    transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 100.0f);
     shaderManager.addUniform("transformMatrix");
     appStartTime=time.getTime();
     glutMainLoop();
@@ -132,7 +132,7 @@ void App::setupStaticAppFunctions()
 void App::update() {
     long double timeSec=(time.getTime()-appStartTime)/(long double)1e9;
     //transform.setTranslation(0,0, 0);
-    transform.setRotation(acos(-1)/2.0, 0, 0);
+    transform.setRotation(-acos(-1)/2.0, 0, 0);
     float scale=0.625+0.375*sin(2*timeSec*acos(-1));
     //transform.setScale(scale, scale, scale);
     transform.setCamera(camera);
@@ -148,7 +148,10 @@ void App::processInput() {
         float moveY=input.getMousePos().getY()-window.getHeight()/2;
         float rotateX=2*rotateSpeed*(moveY/(float)window.getHeight())*(fovAngle/2.0f);
         float rotateY=2*rotateSpeed*(moveX/(float)window.getWidth())*(fovAngle/2.0f);
-        camera.rotateX(rotateX);
+        if(!(camera.getForward().getY()>=0.95f && moveY<0) && !(camera.getForward().getY()<=-0.95f && moveY>0)) {
+            camera.rotateX(-rotateX);
+        }
+        //cout << camera.getForward() << endl;
         camera.rotateY(rotateY);
         glutWarpPointer(window.getWidth()/2, window.getHeight()/2);
     }
@@ -170,18 +173,18 @@ void App::processInput() {
         camera.move(camera.getForward(), moveSpeed);
     }
     if(input.getKeyState('s')) {
-        camera.move(-1.0f*camera.getForward(), moveSpeed);
+        camera.move(-1.0f * camera.getForward(), moveSpeed);
     }
-    if(input.getKeyState('q')) {
+    /*if(input.getKeyState('q')) {
         camera.rotateZ(0.01*rotateSpeed);
     }
     if(input.getKeyState('e')) {
         camera.rotateZ(-0.01*rotateSpeed);
-    }
+    }*/
     if(input.getKeyState(27)) { //esc
         glutLeaveMainLoop();
     }
-    if(input.getKeyState('z')) {
+    /*if(input.getKeyState('z')) {
         fovAngle-=acos(-1)/360.0;
         transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 1000.0f);
 
@@ -190,5 +193,5 @@ void App::processInput() {
         fovAngle+=acos(-1)/360.0;
         transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 1000.0f);
 
-    }
+    }*/
 }

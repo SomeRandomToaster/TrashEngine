@@ -11,7 +11,7 @@ vector3f rotate(const vector3f& vInput, const vector3f& axis, const float angle)
     vector3f a=axis.normalize();
     float vAngle = acos(dot(a, vector3f(0, 0, 1)));
     vector3f aXY=a-vector3f(0, 0, a.getZ());
-    if(aXY.length()<1e-8) {
+    if(aXY.length()==0) {
         aXY=vector3f(1, 0, 0);
     }
     aXY=aXY.normalize();

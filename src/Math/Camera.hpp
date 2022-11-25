@@ -64,10 +64,12 @@ void Camera::move(vector3f direction, float amount) {
     pos=pos+direction.normalize()*amount;
 }
 void Camera::rotateX(const float& angle) {
-    up=rotate(up, getRight(), angle);
-    forward=rotate(forward, getRight(), angle);
-    up=up.normalize();
+    vector3f hAxis=cross(vector3f(0, 1, 0),forward);
+    hAxis.normalize();
+    forward=rotate(forward, hAxis, angle);
     forward=forward.normalize();
+    up=cross(forward, hAxis);
+
 }
 void Camera::rotateY(const float& angle) {
     forward=rotate(forward, up, angle);
