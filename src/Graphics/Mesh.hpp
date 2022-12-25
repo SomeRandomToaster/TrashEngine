@@ -17,7 +17,7 @@ class Mesh {
     GLuint* indices;
 public:
     Mesh();
-    void setProgramID(const GLuint program);
+    void setProgramId(const GLuint program);
     void addVertices(const vector <Vertex> &v, const vector<GLuint> &i);
     void addVerticesFromModel(const string& fileName);
     void draw();
@@ -35,18 +35,20 @@ void Mesh::addVertices(const vector <Vertex> &vBuf, const vector<GLuint> &iBuf) 
 
     vCount=vBuf.size();
     iCount=iBuf.size();
-    GLfloat* vertices=new GLfloat[vCount*3];
+    GLfloat* vertices=new GLfloat[vCount*5];
     for(int i=0; i<vCount; i++) {
-        vertices[i*3]=vBuf[i].getPos().getX();
-        vertices[i*3+1]=vBuf[i].getPos().getY();
-        vertices[i*3+2]=vBuf[i].getPos().getZ();
+        vertices[i*5]=vBuf[i].getPos().getX();
+        vertices[i*5+1]=vBuf[i].getPos().getY();
+        vertices[i*5+2]=vBuf[i].getPos().getZ();
+        vertices[i*5+3]=vBuf[i].getTexCoord().getX();
+        vertices[i*5+4]=vBuf[i].getTexCoord().getY();
     }
     indices=new GLuint[iCount];
     for(int i=0; i<iCount; i++) {
         indices[i]=iBuf[i];
     }
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
-    glBufferData(GL_ARRAY_BUFFER, vCount*3*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vCount*5*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboId);
@@ -54,21 +56,27 @@ void Mesh::addVertices(const vector <Vertex> &vBuf, const vector<GLuint> &iBuf) 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 void Mesh::draw() {
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
-    glVertexAttribPointer(glGetAttribLocation(programId, "position"), 3, GL_FLOAT, false, 0, nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 5*sizeof(GLfloat), nullptr);
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, 5*sizeof(GLfloat), (void*)(3*sizeof(GLfloat)));
+    //glVertexAttribPointer(glGetAttribLocation(programId, "position"), 3, GL_FLOAT, false, 5*sizeof(GLfloat), nullptr);
+
     glEnableVertexAttribArray(glGetAttribLocation(programId, "position"));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboId);
     glDrawElements(GL_TRIANGLES, iCount, GL_UNSIGNED_INT, nullptr);
     //glDrawArrays(GL_TRIANGLE_STRIP, 0, vCount);
 
-    glDisableVertexAttribArray(glGetAttribLocation(programId, "position"));
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     //cout << "draw" << endl;
 }
 
-void Mesh::setProgramID(const GLuint program) {
+void Mesh::setProgramId(const GLuint program) {
     programId=program;
 }
 void Mesh::addVerticesFromModel(const string& fileName) {
@@ -87,7 +95,8 @@ void Mesh::addVerticesFromModel(const string& fileName) {
             float x = stof(strArray[i+1]);
             float y = stof(strArray[i+2]);
             float z = stof(strArray[i+3]);
-            Vertex newVertex(vector3f(x, y, z));
+            vector2f tmpTexCoord(0.5f, 0.8f);
+            Vertex newVertex(vector3f(x, y, z), tmpTexCoord);
             vBuf.push_back(newVertex);
         }
         if(strArray[i].size()==1 && strArray[i][0]=='f') {

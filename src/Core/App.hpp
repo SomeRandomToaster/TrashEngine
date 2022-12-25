@@ -7,21 +7,22 @@
 
 #endif //TRASHENGINE_MAINCYCLE_HPP
 
+#define Pi acos(-1)
+
 class App;
 App* currentAppInstance;
 
 class App {
     const int MAX_FPS=240;
-    const string VERTEX_SHADER_PATH="../src/Graphics/Shaders/VertexShader.glsl";
-    const string FRAGMENT_SHADER_PATH="../src/Graphics/Shaders/FragmentShader.glsl";
-    const string MODEL_PATH="../res/models/goodMorning.obj";
+    const string MODEL_PATH="../res/models/statueOfLiberty.obj";
+    const string TEXTURE_PATH="../res/textures/geo2.bmp";
     WindowClass window;
     TimeClass time;
     Input input;
     RenderTool renderTool;
-    Shaders shaderManager;
-    Mesh mesh; //REMOVE ME LATER
+    ResourceLoader resLoader;
     MatrixTransformer transform;
+    BasicShader shader;
     Camera camera;
     float fovAngle;
     bool isRunning;
@@ -44,7 +45,11 @@ public:
     void processInput();
 };
 
-App::App(WindowClass& window) : window(window) {
+App::App(WindowClass& window) :
+    window(window),
+    resLoader(TEXTURE_PATH)
+
+    {
     setupStaticAppFunctions();
     isRunning=false;
     lastTime=time.getTime();
@@ -52,24 +57,24 @@ App::App(WindowClass& window) : window(window) {
     frameTimeCounter=0;
     frameCounter=0;
     frameTime=1/(double)MAX_FPS;
-    fovAngle=7.0f/18.0f*acos(-1);
+    fovAngle=7.0f/18.0f*Pi;
 }
 
 void App::start() {
     if(isRunning)
         return;
     isRunning=true;
-    shaderManager.loadVertexShader(VERTEX_SHADER_PATH);
-    shaderManager.loadFragmentShader(FRAGMENT_SHADER_PATH);
-    shaderManager.compileShaderProgram();
-    mesh.setProgramID(shaderManager.getProgramID());
 
-    glutWarpPointer(window.getWidth()/2, window.getHeight()/2);
-    glutSetCursor(GLUT_CURSOR_NONE);
-    mesh.addVerticesFromModel(MODEL_PATH);
+    resLoader.mesh.addVerticesFromModel(MODEL_PATH);
+
     transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 100.0f);
-    shaderManager.addUniform("transformMatrix");
+    transform.setRotation(-Pi/2.0, 0, 0);
+
+    input.setMousePos(window.getWidth()/2, window.getHeight()/2);
+    input.lockCursor();
+
     appStartTime=time.getTime();
+
     glutMainLoop();
 
     stop();
@@ -113,8 +118,11 @@ void App::run() {
 
 void App::render() {
     renderTool.clearScreen();
-    mesh.draw();
+    resLoader.material.texture.bind();
+    resLoader.mesh.setProgramId(shader.getProgramId());
+    resLoader.mesh.draw();
     window.render();
+    resLoader.material.texture.unbind();
 }
 
 void App::cleanUp() {
@@ -131,29 +139,37 @@ void App::setupStaticAppFunctions()
 }
 void App::update() {
     long double timeSec=(time.getTime()-appStartTime)/(long double)1e9;
-    //transform.setTranslation(0,0, 0);
-    transform.setRotation(-acos(-1)/2.0, 0, 0);
-    float scale=0.625+0.375*sin(2*timeSec*acos(-1));
-    //transform.setScale(scale, scale, scale);
     transform.setCamera(camera);
-    shaderManager.setUniform("transformMatrix", transform.getProjectedTransformation());
+    shader.updateUniforms(transform.getProjectedTransformation(), vector3f(1, 1, 1));
 }
 void App::processInput() {
     float scaleSpeed=0.5f;
     float rotateSpeed=0.25f;
     float moveSpeed=0.005f;
     static float scale=1.0f;
-    if(input.getMousePos().getX()!=window.getWidth()/2 || input.getMousePos().getY()!=window.getHeight()/2) {
-        float moveX=input.getMousePos().getX()-window.getWidth()/2;
-        float moveY=input.getMousePos().getY()-window.getHeight()/2;
-        float rotateX=2*rotateSpeed*(moveY/(float)window.getHeight())*(fovAngle/2.0f);
-        float rotateY=2*rotateSpeed*(moveX/(float)window.getWidth())*(fovAngle/2.0f);
-        if(!(camera.getForward().getY()>=0.95f && moveY<0) && !(camera.getForward().getY()<=-0.95f && moveY>0)) {
-            camera.rotateX(-rotateX);
+    if(input.getMouseButtonState(LEFT_MOUSE_BUTTON)) {
+        if(!input.getCursorLocked()) {
+            input.setMousePos(window.getWidth() / 2, window.getHeight() / 2);
+            input.lockCursor();
         }
-        //cout << camera.getForward() << endl;
-        camera.rotateY(rotateY);
-        glutWarpPointer(window.getWidth()/2, window.getHeight()/2);
+    }
+    if(input.getMouseButtonState(RIGHT_MOUSE_BUTTON)) {
+        input.unlockCursor();
+    }
+    if(input.getCursorLocked()) {
+        if (input.getMousePos().getX() != window.getWidth() / 2 ||
+            input.getMousePos().getY() != window.getHeight() / 2) {
+            float moveX = input.getMousePos().getX() - window.getWidth() / 2;
+            float moveY = input.getMousePos().getY() - window.getHeight() / 2;
+            float rotateX = 2 * rotateSpeed * (moveY / (float) window.getHeight()) * (fovAngle / 2.0f);
+            float rotateY = 2 * rotateSpeed * (moveX / (float) window.getWidth()) * (fovAngle / 2.0f);
+            if (!(camera.getForward().getY() >= 0.95f && moveY < 0) &&
+                !(camera.getForward().getY() <= -0.95f && moveY > 0)) {
+                camera.rotateX(-rotateX);
+            }
+            camera.rotateY(rotateY);
+            input.setMousePos(window.getWidth() / 2, window.getHeight() / 2);
+        }
     }
     if(input.getKeyState('c')) {
         scale-=scaleSpeed;
@@ -175,23 +191,7 @@ void App::processInput() {
     if(input.getKeyState('s')) {
         camera.move(-1.0f * camera.getForward(), moveSpeed);
     }
-    /*if(input.getKeyState('q')) {
-        camera.rotateZ(0.01*rotateSpeed);
-    }
-    if(input.getKeyState('e')) {
-        camera.rotateZ(-0.01*rotateSpeed);
-    }*/
-    if(input.getKeyState(27)) { //esc
+    if(input.getKeyState(ESCAPE_KEY)) {
         glutLeaveMainLoop();
     }
-    /*if(input.getKeyState('z')) {
-        fovAngle-=acos(-1)/360.0;
-        transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 1000.0f);
-
-    }
-    if(input.getKeyState('x')) {
-        fovAngle+=acos(-1)/360.0;
-        transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 1000.0f);
-
-    }*/
 }

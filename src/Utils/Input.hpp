@@ -7,6 +7,12 @@
 
 #endif //TRASHENGINE_INPUT_HPP
 
+#define LEFT_MOUSE_BUTTON 0
+#define MIDDLE_MOUSE_BUTTON 1
+#define RIGHT_MOUSE_BUTTON 2
+
+#define ESCAPE_KEY 27
+
 class Input;
 Input* currentInputInstance;
 
@@ -16,6 +22,7 @@ class Input {
     bool mouseState[3];
     bool unprocessedMouse[3];
     int mouseX, mouseY;
+    bool cursorLocked;
     void setupStaticInputFunctions();
     static void normalKeyDownCallback(unsigned char key, int x, int y);
     void normalKeyDown(unsigned char key, int x, int y);
@@ -34,6 +41,12 @@ public:
     bool getMouseButtonDown(int button);
     bool getMouseButtonUp(int button);
     vector2f getMousePos();
+
+    void setMousePos(const int x, const int y);
+    void setCursor(const bool enable);
+    void lockCursor();
+    void unlockCursor();
+    bool getCursorLocked();
 };
 Input::Input() {
     for(int i=0; i<256; i++) {
@@ -46,6 +59,7 @@ Input::Input() {
     }
     glutIgnoreKeyRepeat(1);
     setupStaticInputFunctions();
+    cursorLocked=false;
 }
 void Input::setupStaticInputFunctions() {
     currentInputInstance = this;
@@ -135,4 +149,24 @@ bool Input::getMouseButtonUp(int button) {
 }
 vector2f Input::getMousePos() {
     return vector2f(mouseX, mouseY);
+}
+void Input::setMousePos(const int x, const int y) {
+    glutWarpPointer(x, y);
+}
+void Input::setCursor(const bool enable) {
+    if(enable)
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+    else
+        glutSetCursor(GLUT_CURSOR_NONE);
+}
+void Input::lockCursor() {
+    cursorLocked=true;
+    setCursor(false);
+}
+void Input::unlockCursor() {
+    cursorLocked=false;
+    setCursor(true);
+}
+bool Input::getCursorLocked() {
+    return cursorLocked;
 }

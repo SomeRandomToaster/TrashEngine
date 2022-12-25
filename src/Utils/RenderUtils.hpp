@@ -19,6 +19,7 @@ public:
     GLuint programID;
     RenderTool();
     void clearScreen(double r=0, double g=0, double b=0);
+    void enableTextures(bool enable);
     std::string getGlVersion();
 };
 
@@ -29,6 +30,7 @@ RenderTool::RenderTool() {
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
     glEnable(GL_FRAMEBUFFER_SRGB);
 
 }
@@ -38,4 +40,10 @@ void RenderTool::clearScreen(const double r, const double g, const double b) {
 }
 std::string RenderTool::getGlVersion() {
     return std::string((const char*)glGetString(GL_VERSION));
+}
+void RenderTool::enableTextures(bool enable) {
+    if(enable)
+        glEnable(GL_TEXTURE_2D);
+    else
+        glDisable(GL_TEXTURE_2D);
 }

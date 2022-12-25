@@ -7,7 +7,7 @@
 
 #endif //TRASHENGINE_RESOURCELOADER_HPP
 
-class Shaders {
+class Shader {
     GLuint vShaderId;
     GLuint fShaderId;
     GLuint programId;
@@ -15,28 +15,39 @@ class Shaders {
     GLuint linkProgram(GLuint vShader, GLuint fShader);
     map<string, GLint> uniformIdMap;
 public:
+    void initUniforms();
     void loadVertexShader(const std::string& filePath);
     void loadFragmentShader(const std::string& filePath);
     void compileShaderProgram();
-    GLuint getProgramID();
+    GLuint getProgramId();
     void addUniform(const string& name);
     void setUniform(const string& name, const int val);
     void setUniform(const string& name, const float val);
     void setUniform(const string& name, const vector3f& val);
     void setUniform(const string& name, const matrix4f& val);
 };
-
-void Shaders::loadVertexShader(const std::string& filePath) {
+class BasicShader : public Shader {
+    const string BASIC_VERTEX_SHADER_PATH="../res/shaders/BasicVertexShader.glsl";
+    const string BASIC_FRAGMENT_SHADER_PATH="../res/shaders/BasicFragmentShader.glsl";
+public:
+    BasicShader();
+    void updateUniforms(const matrix4f& transformMatrix, const vector3f& color);
+};
+void Shader::initUniforms() {
+    addUniform("transformMatrix");
+    addUniform("color");
+}
+void Shader::loadVertexShader(const std::string& filePath) {
     vShaderId=compileShader(filePath, GL_VERTEX_SHADER);
 }
-void Shaders::loadFragmentShader(const std::string& filePath) {
+void Shader::loadFragmentShader(const std::string& filePath) {
     fShaderId=compileShader(filePath, GL_FRAGMENT_SHADER);
 }
-void Shaders::compileShaderProgram() {
+void Shader::compileShaderProgram() {
     programId=linkProgram(vShaderId, fShaderId);
     glUseProgram(programId);
 }
-GLuint Shaders::compileShader(const std::string& filePath, const GLenum shaderType) {
+GLuint Shader::compileShader(const std::string& filePath, const GLenum shaderType) {
     GLuint shaderID = glCreateShader(shaderType);
     std::string shaderCode;
     std::ifstream shaderFile(filePath);
@@ -71,7 +82,7 @@ GLuint Shaders::compileShader(const std::string& filePath, const GLenum shaderTy
     }
     return shaderID;
 }
-GLuint Shaders::linkProgram(GLuint vShader, GLuint fShader) {
+GLuint Shader::linkProgram(GLuint vShader, GLuint fShader) {
     GLuint programID=glCreateProgram();
     if (programID == 0)
     {
@@ -99,22 +110,33 @@ GLuint Shaders::linkProgram(GLuint vShader, GLuint fShader) {
 
     return programID;
 }
-GLuint Shaders::getProgramID() {
+GLuint Shader::getProgramId() {
     return programId;
 }
-void Shaders::addUniform(const std::string& name) {
+void Shader::addUniform(const std::string& name) {
     GLint uniformId=glGetUniformLocation(programId, name.c_str());
     uniformIdMap.insert({name, uniformId});
 }
-void Shaders::setUniform(const string& name, const int val) {
+void Shader::setUniform(const string& name, const int val) {
     glUniform1i(uniformIdMap[name], val);
 }
-void Shaders::setUniform(const string& name, const float val) {
+void Shader::setUniform(const string& name, const float val) {
     glUniform1f(uniformIdMap[name], val);
 }
-void Shaders::setUniform(const string& name, const vector3f& val) {
+void Shader::setUniform(const string& name, const vector3f& val) {
     glUniform3f(uniformIdMap[name], val.getX(), val.getY(), val.getZ());
 }
-void Shaders::setUniform(const string& name, const matrix4f& val) {
+void Shader::setUniform(const string& name, const matrix4f& val) {
     glUniformMatrix4fv(uniformIdMap[name], 1, GL_FALSE, val.data);
+}
+
+BasicShader::BasicShader() {
+    loadVertexShader(BASIC_VERTEX_SHADER_PATH);
+    loadFragmentShader(BASIC_FRAGMENT_SHADER_PATH);
+    compileShaderProgram();
+    initUniforms();
+}
+void BasicShader::updateUniforms(const matrix4f& transformMatrix, const vector3f& color) {
+    setUniform("transformMatrix", transformMatrix);
+    setUniform("color", color);
 }

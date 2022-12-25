@@ -26,6 +26,9 @@
 #include "../Utils/Input.hpp"
 #include "../Graphics/Vertex.hpp"
 #include "../Graphics/Mesh.hpp"
+#include "../Graphics/Texture.hpp"
+#include "../Graphics/Material.hpp"
+#include "../Utils/ResourceLoader.hpp"
 #include "App.hpp"
 
 const int WIDTH=800;
