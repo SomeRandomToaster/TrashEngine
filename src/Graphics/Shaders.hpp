@@ -15,7 +15,6 @@ class Shader {
     GLuint linkProgram(GLuint vShader, GLuint fShader);
     map<string, GLint> uniformIdMap;
 public:
-    void initUniforms();
     void loadVertexShader(const std::string& filePath);
     void loadFragmentShader(const std::string& filePath);
     void compileShaderProgram();
@@ -26,14 +25,116 @@ public:
     void setUniform(const string& name, const vector3f& val);
     void setUniform(const string& name, const matrix4f& val);
 };
+
 class BasicShader : public Shader {
     const string BASIC_VERTEX_SHADER_PATH="../res/shaders/BasicVertexShader.glsl";
     const string BASIC_FRAGMENT_SHADER_PATH="../res/shaders/BasicFragmentShader.glsl";
 public:
     BasicShader();
+    void initUniforms();
     void updateUniforms(const matrix4f& transformMatrix, const vector3f& color);
 };
-void Shader::initUniforms() {
+
+class PhongShader : public Shader {
+    const string PHONG_VERTEX_SHADER_PATH="../res/shaders/PhongVertexShader.glsl";
+    const string PHONG_FRAGMENT_SHADER_PATH="../res/shaders/PhongFragmentShader.glsl";
+    const float DEFAULT_BASE_LIGHT_INTENSITY=0.05;
+    const float DEFAULT_DIFFUSE_LIGHT_INTENSITY=0.4;
+    const float DEFAULT_SPECULAR_LIGHT_INTENSITY=0.55;
+    const vector3f DEFAULT_SPECULAR_LIGHT_COLOR=vector3f(1, 1, 1);
+    LightSource light;
+    float baseLightIntensity;
+    float diffuseLightIntensity;
+    float specularLightIntensity;
+    vector3f specularLightColor;
+public:
+    PhongShader();
+    void initUniforms();
+    void updateUniforms(const matrix4f& transformMatrix, const vector3f& baseColor);
+    void setBaseLightIntensity(const float intensity);
+    float getBaseLightIntensity() const;
+    void setDiffiseLightIntensity(const float intensity);
+    float getDiffuseLightIntensity() const;
+    void setSpecularLightIntensity(const float intensity);
+    float getSpecularLightIntensity() const;
+    void setSpecularLightColor(const vector3f& color);
+    vector3f getSpecularLightColor() const;
+    void setLight(const LightSource& newLight);
+    LightSource getLight() const;
+};
+PhongShader::PhongShader() {
+    loadVertexShader(PHONG_VERTEX_SHADER_PATH);
+    loadFragmentShader(PHONG_FRAGMENT_SHADER_PATH);
+    compileShaderProgram();
+    baseLightIntensity=DEFAULT_BASE_LIGHT_INTENSITY;
+    diffuseLightIntensity=DEFAULT_DIFFUSE_LIGHT_INTENSITY;
+    specularLightIntensity=DEFAULT_SPECULAR_LIGHT_INTENSITY;
+    specularLightColor=DEFAULT_SPECULAR_LIGHT_COLOR;
+    initUniforms();
+}
+void PhongShader::initUniforms() {
+    addUniform("transformMatrix");
+    addUniform("baseColor");
+    addUniform("lightColor");
+    addUniform("lightPos");
+    addUniform("baseLightIntensity");
+    addUniform("diffuseLightIntensity");
+    addUniform("specularLightIntensity");
+    addUniform("specularLightColor");
+}
+void PhongShader::updateUniforms(const matrix4f& transformMatrix, const vector3f& baseColor) {
+    setUniform("transformMatrix", transformMatrix);
+    setUniform("baseColor", baseColor);
+    setUniform("baseLightIntensity", baseLightIntensity);
+    setUniform("diffuseLightIntensity", diffuseLightIntensity);
+    setUniform("lightPos", light.getPos());
+    setUniform("lightColor", light.getColor());
+    setUniform("specularLightIntensity", specularLightIntensity);
+    setUniform("specularLightColor", specularLightColor);
+}
+void PhongShader::setBaseLightIntensity(const float intensity) {
+    baseLightIntensity=intensity;
+}
+float PhongShader::getBaseLightIntensity() const {
+    return baseLightIntensity;
+}
+void PhongShader::setDiffiseLightIntensity(const float intensity) {
+    diffuseLightIntensity=intensity;
+}
+float PhongShader::getDiffuseLightIntensity() const {
+    return diffuseLightIntensity;
+}
+void PhongShader::setSpecularLightIntensity(const float intensity) {
+    specularLightIntensity=intensity;
+}
+float PhongShader::getSpecularLightIntensity() const {
+    return specularLightIntensity;
+}
+void PhongShader::setSpecularLightColor(const vector3f& color) {
+    specularLightColor=color;
+}
+vector3f PhongShader::getSpecularLightColor() const {
+    return specularLightColor;
+}
+void PhongShader::setLight(const LightSource& newLight) {
+    light=newLight;
+}
+LightSource PhongShader::getLight() const {
+    return light;
+}
+
+BasicShader::BasicShader() {
+    loadVertexShader(BASIC_VERTEX_SHADER_PATH);
+    loadFragmentShader(BASIC_FRAGMENT_SHADER_PATH);
+    compileShaderProgram();
+    initUniforms();
+}
+void BasicShader::updateUniforms(const matrix4f& transformMatrix, const vector3f& color) {
+    setUniform("transformMatrix", transformMatrix);
+    setUniform("color", color);
+}
+
+void BasicShader::initUniforms() {
     addUniform("transformMatrix");
     addUniform("color");
 }
@@ -130,13 +231,3 @@ void Shader::setUniform(const string& name, const matrix4f& val) {
     glUniformMatrix4fv(uniformIdMap[name], 1, GL_FALSE, val.data);
 }
 
-BasicShader::BasicShader() {
-    loadVertexShader(BASIC_VERTEX_SHADER_PATH);
-    loadFragmentShader(BASIC_FRAGMENT_SHADER_PATH);
-    compileShaderProgram();
-    initUniforms();
-}
-void BasicShader::updateUniforms(const matrix4f& transformMatrix, const vector3f& color) {
-    setUniform("transformMatrix", transformMatrix);
-    setUniform("color", color);
-}

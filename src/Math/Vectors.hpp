@@ -11,7 +11,7 @@
 class vector2f {
     double x, y;
 public:
-    vector2f(const double x, const double y);
+    vector2f(const double x=0, const double y=0);
     void setX(const double x);
     void setY(const double y);
     double getX() const;
@@ -31,7 +31,7 @@ public:
 class vector3f {
     double x, y, z;
 public:
-    vector3f(const double x, const double y, const double z);
+    vector3f(const double x=0, const double y=0, const double z=0);
     void setX(const double x);
     void setY(const double y);
     void setZ(const double z);

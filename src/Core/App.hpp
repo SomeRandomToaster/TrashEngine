@@ -14,7 +14,7 @@ App* currentAppInstance;
 
 class App {
     const int MAX_FPS=240;
-    const string MODEL_PATH="../res/models/statueOfLiberty.obj";
+    const string MODEL_PATH="../res/models/sphere.obj";
     const string TEXTURE_PATH="../res/textures/geo2.bmp";
     WindowClass window;
     TimeClass time;
@@ -22,7 +22,7 @@ class App {
     RenderTool renderTool;
     ResourceLoader resLoader;
     MatrixTransformer transform;
-    BasicShader shader;
+    PhongShader shader;
     Camera camera;
     float fovAngle;
     bool isRunning;
@@ -66,12 +66,45 @@ void App::start() {
     isRunning=true;
 
     resLoader.mesh.addVerticesFromModel(MODEL_PATH);
+    /*vector <Vertex> vBuf {
+            Vertex(vector3f(-0.5, -0.5, 0.0), vector2f(0.0, 0.0)),
+            Vertex(vector3f(-0.5, -0.5, 0.0), vector2f(0.0, 0.0)),
+            Vertex(vector3f(0.5, -0.5, 0.0), vector2f(1.0, 0.0)),
+            Vertex(vector3f(0.5, -0.5, 0.0), vector2f(1.0, 0.0)),
+            Vertex(vector3f(0.5, 0.5, 0.0), vector2f(0.0, 0.0)),
+            Vertex(vector3f(0.5, 0.5, 0.0), vector2f(0.0, 0.0)),
+            Vertex(vector3f(-0.5, 0.5, 0.0), vector2f(1.0, 0.0)),
+            Vertex(vector3f(-0.5, 0.5, 0.0), vector2f(1.0, 0.0)),
+            Vertex(vector3f(0.0, 0.0, 1.0), vector2f(0.5, 1.0)),
+            Vertex(vector3f(0.0, 0.0, 1.0), vector2f(0.5, 1.0)),
+            Vertex(vector3f(0.0, 0.0, 1.0), vector2f(0.5, 1.0)),
+            Vertex(vector3f(0.0, 0.0, 1.0), vector2f(0.5, 1.0)),
+            Vertex(vector3f(-0.5, -0.5, 0.0), vector2f(0.0, 0.0)),
+            Vertex(vector3f(-0.5, -0.5, 0.0), vector2f(0.0, 0.0)),
+            Vertex(vector3f(-0.5, 0.5, 0.0), vector2f(1.0, 0.0)),
+            Vertex(vector3f(0.5, 0.5, 0.0), vector2f(1.0, 1.0)),
+            Vertex(vector3f(-0.5, -0.5, 0.0), vector2f(0.0, 0.0)), //    2
+            Vertex(vector3f(0.5, 0.5, 0.0), vector2f(1.0, 1.0)),   // 1  3
+            Vertex(vector3f(0.5, -0.5, 0.0), vector2f(0.0, 1.0)),
+    };
+    vector <GLuint> iBuf {
+            2, 8, 0,
+            4, 9, 3,
+            6, 10, 5,
+            12, 11, 7,
+            13, 14, 15,
+            16, 17, 18,
+    };
+    resLoader.mesh.addVertices(vBuf, iBuf);
+    */
 
     transform.initProjection(fovAngle, window.getWidth(), window.getHeight(), 0.001f, 100.0f);
     transform.setRotation(-Pi/2.0, 0, 0);
 
     input.setMousePos(window.getWidth()/2, window.getHeight()/2);
     input.lockCursor();
+
+    shader.setLight(LightSource(vector3f(0, 0, 25), vector3f(1, 1, 1)));
 
     appStartTime=time.getTime();
 
@@ -140,7 +173,13 @@ void App::setupStaticAppFunctions()
 void App::update() {
     long double timeSec=(time.getTime()-appStartTime)/(long double)1e9;
     transform.setCamera(camera);
-    shader.updateUniforms(transform.getProjectedTransformation(), vector3f(1, 1, 1));
+    transform.setRotation(-Pi/2.0, 0, 0.5*Pi*timeSec);
+    float r=0.5+0.5*sin(0.5*Pi*timeSec);
+    float g=0.5+0.5*sin(0.5*Pi*timeSec+2*Pi/3);
+    float b=0.5+0.5*sin(0.5*Pi*timeSec+4*Pi/3);
+    shader.setLight(LightSource(vector3f(-10*sin(0.5*Pi*timeSec), -10*cos(0.5*Pi*timeSec), 0), vector3f(1, 1, 1)));
+    shader.setSpecularLightColor(vector3f(r, g, b));
+    shader.updateUniforms(transform.getProjectedTransformation(), vector3f(r, g, b));
 }
 void App::processInput() {
     float scaleSpeed=0.5f;
